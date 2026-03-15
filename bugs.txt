@@ -1,0 +1,9 @@
+Bug 1: The hints are not accurate (Example being a game where the
+correct number is suppose to be 99 but each hint after a given input is to go lower, even below 1 despite the range of 
+guesses being 1-100 inclusively)
+
+Bug 2: Whether a user finds the correct number or not and desires to play a new game, they will be 
+unable to as it seems unresponsive.
+
+Bug 3: If I input a string or float, it is accepted and an attempt is deducted. Even if it is an integer, if it was already
+a guess, it can be reused.
