@@ -25,14 +25,14 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- [The purpose of this game is for a user to guess within a range of numbers a secret number with a limited amount of attempts and if they can test their luck in discovering the number with many attempt to spare.] Describe the game's purpose.
+- [The bugs that I had discovered as a resulting of viewing the game for the first time and playing it were that the hints were inaccurate as I was trying to discover the hidden number. Another bug would be that whenever I wanted to play a new game out of interest, the game being over, or change the difficulty to play a new game, it would freeze, making the game unplayable. Also, strings along with floats were accepted inputs in the game, but the secret number is an integer, though the float could truncate, it isn't accurate and wastes attempts. Also, when you change the difficulty of the game, it shows its amount of attempts but not the correct range of numbers to select from, it remains the range of numbers of normal difficulty.] Detail which bugs you found.
+- [The fixes I applied was to have the guesses be more accurate so that the player can be certain of how close they are to correctly guess the secret number. Also, I fixed the ability of the game to not freeze when the player decides to play a new game. Also, another fix would be that inputs be integers and cannot be floats nor strings. Also, a fix would be that the number of attempts would be accurate and if the player continues to make attempts even after the game is over, it will make sure to inform the player that the game is already over and they should play a new game.] Explain what fixes you applied.
 
 ## 📸 Demo
 
-- [ ] [Insert a screenshot of your fixed, winning game here]
-
+- [![alt text](image.png) ] [Insert a screenshot of your fixed, winning game here]
+- [![alt text](image-1.png)] [ Advanced Edge-Case Testing]
 ## 🚀 Stretch Features
 
 - [ ] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]
