@@ -11,6 +11,9 @@ from logic_utils import (
     should_show_hint,
     next_attempt_count,
     is_duplicate_guess,
+    guess_closeness_percent,
+    guess_temperature_label,
+    build_guess_summary,
 )
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
@@ -65,6 +68,45 @@ if st.session_state.difficulty != difficulty:
     st.session_state.status = "playing"
     st.session_state.history = []
 
+
+def render_guess_history_sidebar():
+    st.sidebar.subheader("Guess History")
+    if st.session_state.history:
+        for attempt_number, previous_guess in enumerate(
+            st.session_state.history,
+            start=1,
+        ):
+            closeness = guess_closeness_percent(
+                previous_guess,
+                st.session_state.secret,
+                low,
+                high,
+            )
+            label, emoji, _style = guess_temperature_label(closeness)
+            st.sidebar.caption(
+                f"{attempt_number}. Guess {previous_guess} - "
+                f"{emoji} {label}, {closeness}% close"
+            )
+            st.sidebar.progress(closeness)
+    else:
+        st.sidebar.caption("No guesses yet.")
+
+
+def render_session_summary():
+    st.subheader("Session Summary")
+    if st.session_state.history:
+        st.table(
+            build_guess_summary(
+                st.session_state.history,
+                st.session_state.secret,
+                low,
+                high,
+            )
+        )
+    else:
+        st.caption("No submitted guesses yet.")
+
+
 st.subheader("Make a guess")
 
 # FIX: We replaced hardcoded range text with dynamic {low}/{high} and shared attempts logic.
@@ -97,6 +139,8 @@ if new_game:
     st.rerun()
 
 if st.session_state.status != "playing":
+    render_guess_history_sidebar()
+    render_session_summary()
     if st.session_state.status == "won":
         st.success("You already won. Start a new game to play again.")
     else:
@@ -139,7 +183,23 @@ if submit:
 
         # FIX: We suppress hints on final failed guess so game-over messaging is clear.
         if should_show_hint(show_hint, game_over):
-            st.warning(message)
+            closeness = guess_closeness_percent(
+                guess_int,
+                st.session_state.secret,
+                low,
+                high,
+            )
+            label, emoji, style = guess_temperature_label(closeness)
+            structured_hint = (
+                f"{emoji} {label}: {message} "
+                f"Your guess is {closeness}% close."
+            )
+            if style == "error":
+                st.error(structured_hint)
+            elif style == "warning":
+                st.warning(structured_hint)
+            else:
+                st.info(structured_hint)
 
         st.session_state.score = update_score(
             current_score=st.session_state.score,
@@ -162,6 +222,9 @@ if submit:
                     f"The secret was {st.session_state.secret}. "
                     f"Score: {st.session_state.score}"
                 )
+
+render_guess_history_sidebar()
+render_session_summary()
 
 with st.expander("Developer Debug Info"):
     st.write("Secret:", st.session_state.secret)

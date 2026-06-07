@@ -36,3 +36,15 @@ It wrote the code, ran away, and now the game is unplayable.
 ## 🚀 Stretch Features
 
 - [ ] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]
+
+## UI Enhancements Added
+
+The game now gives more structured and user-friendly feedback after each valid guess:
+
+- `guess_temperature_label()` in `logic_utils.py` maps the closeness score into Hot, Warm, Cool, or Cold states with an emoji and Streamlit message style.
+- `build_guess_summary()` in `logic_utils.py` creates table-ready rows with the attempt number, guess value, percent closeness, and Hot/Cold state.
+- `render_guess_history_sidebar()` in `app.py` displays each previous guess in the sidebar with a progress bar and Hot/Cold label.
+- `render_session_summary()` in `app.py` outputs a session summary table below the main controls so players can review their full round.
+- The submit handler in `app.py` combines the original higher/lower hint from `check_guess()` with the Hot/Cold state and percent closeness, then displays it with `st.error`, `st.warning`, or `st.info` depending on how close the guess was.
+
+These changes are presentation-focused and do not change the core game rules, scoring logic, attempt counting, or input validation.

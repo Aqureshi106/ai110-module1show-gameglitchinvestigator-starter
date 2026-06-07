@@ -7,6 +7,9 @@ from logic_utils import (
     should_show_hint,
     next_attempt_count,
     is_duplicate_guess,
+    guess_closeness_percent,
+    guess_temperature_label,
+    build_guess_summary,
 )
 
 
@@ -118,6 +121,13 @@ def test_check_guess_too_low_int_vs_str_secret():
     )
 
 
+def test_check_guess_compares_string_secret_numerically():
+    """String secrets should be compared as numbers, not lexicographic text."""
+    outcome, message = check_guess(90, "100")
+    assert outcome == "Too Low"
+    assert "HIGHER" in message
+
+
 # ---------------------------------------------------------------------------
 # Bug-targeted tests: attempts countdown and final-guess behavior
 # ---------------------------------------------------------------------------
@@ -149,6 +159,58 @@ def test_should_not_show_hint_when_game_is_over_even_if_enabled():
     assert should_show_hint(True, False) is True
     assert should_show_hint(True, True) is False
     assert should_show_hint(False, False) is False
+
+
+def test_guess_closeness_percent_exact_guess():
+    """An exact guess should show maximum closeness."""
+    assert guess_closeness_percent(50, 50, 1, 100) == 100
+
+
+def test_guess_closeness_percent_far_guess():
+    """A guess one full range away should bottom out at zero closeness."""
+    assert guess_closeness_percent(1, 100, 1, 100) == 0
+
+
+def test_guess_closeness_percent_clamps_out_of_range_guess():
+    """Out-of-range guesses should not produce negative progress values."""
+    assert guess_closeness_percent(-100, 100, 1, 100) == 0
+
+
+@pytest.mark.parametrize(
+    "closeness, expected_label",
+    [
+        (100, "Hot"),
+        (85, "Hot"),
+        (60, "Warm"),
+        (30, "Cool"),
+        (0, "Cold"),
+    ],
+)
+def test_guess_temperature_label(closeness, expected_label):
+    """Closeness should map to a user-friendly Hot/Cold label."""
+    label, emoji, style = guess_temperature_label(closeness)
+    assert label == expected_label
+    assert emoji
+    assert style in {"error", "warning", "info"}
+
+
+def test_build_guess_summary_returns_table_ready_rows():
+    """Guess summaries should include attempt, guess, closeness, and state data."""
+    rows = build_guess_summary([25, 75], 50, 1, 100)
+    assert rows == [
+        {
+            "Attempt": 1,
+            "Guess": 25,
+            "Closeness": "75%",
+            "State": "🌤️ Warm",
+        },
+        {
+            "Attempt": 2,
+            "Guess": 75,
+            "Closeness": "75%",
+            "State": "🌤️ Warm",
+        },
+    ]
 
 
 # ---------------------------------------------------------------------------

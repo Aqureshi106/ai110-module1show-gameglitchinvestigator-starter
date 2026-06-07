@@ -38,23 +38,16 @@ def check_guess(guess, secret):
 
     outcome examples: "Win", "Too High", "Too Low"
     """
-    if guess == secret:
+    guess_value = int(guess)
+    secret_value = int(secret)
+
+    if guess_value == secret_value:
         return "Win", "🎉 Correct!"
 
     # FIX: We corrected swapped hint directions together during bug triage.
-    try:
-        if guess > secret:
-            return "Too High", "📉 Go LOWER!"
-        else:
-            return "Too Low", "📈 Go HIGHER!"
-    except TypeError:
-        g = str(guess)
-        if g == secret:
-            return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📉 Go LOWER!"
-        # FIX: You isolated this failing path and Copilot helped restore the missing return for too-low string-secret comparisons.
-        return "Too Low", "📈 Go HIGHER!"
+    if guess_value > secret_value:
+        return "Too High", "📉 Go LOWER!"
+    return "Too Low", "📈 Go HIGHER!"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -108,6 +101,42 @@ def attempts_left(attempt_limit: int, attempts_used: int) -> int:
     # FIX: Added with Copilot to make attempts countdown testable and consistent in the UI.
     """Return remaining attempts after the number already used."""
     return attempt_limit - attempts_used
+
+
+def guess_closeness_percent(guess: int, secret: int, low: int, high: int) -> int:
+    """Return 0-100 closeness where 100 means the guess is exactly correct."""
+    range_size = max(high - low, 1)
+    distance = abs(int(guess) - int(secret))
+    closeness = 100 - round((distance / range_size) * 100)
+    return max(0, min(100, closeness))
+
+
+def guess_temperature_label(closeness: int) -> tuple[str, str, str]:
+    """Return a friendly Hot/Cold label, emoji, and Streamlit message style."""
+    if closeness >= 85:
+        return "Hot", "🔥", "error"
+    if closeness >= 60:
+        return "Warm", "🌤️", "warning"
+    if closeness >= 30:
+        return "Cool", "💧", "info"
+    return "Cold", "🧊", "info"
+
+
+def build_guess_summary(history: list[int], secret: int, low: int, high: int):
+    """Build table-ready rows summarizing each guess in the current round."""
+    rows = []
+    for attempt_number, guess in enumerate(history, start=1):
+        closeness = guess_closeness_percent(guess, secret, low, high)
+        label, emoji, _style = guess_temperature_label(closeness)
+        rows.append(
+            {
+                "Attempt": attempt_number,
+                "Guess": guess,
+                "Closeness": f"{closeness}%",
+                "State": f"{emoji} {label}",
+            }
+        )
+    return rows
 
 
 def is_game_over(attempt_limit: int, attempts_used: int) -> bool:
